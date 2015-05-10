@@ -1,0 +1,114 @@
+function showThickener1(n,Ut,C,Ups,flux_grad,F,L,V,A)
+%flux_grad=[F/A L/A V/A]
+%C=[CB  CF CL CV CT CFcrit] for  ~hasMinPoint
+%C=[CB CF CL CV CT CFcrit CBmax   ] for hasMinPoint
+%Ups=[UpsF UpsL UpsV] for  ~hasMinPoint
+%Ups=[UpsF UpsL UpsV Upsmax]; for hasMinPoint
+
+set(gca,'xtick',[]);
+set(gca,'ytick',[]);
+axis([-1,20,-30,3]);
+
+showValues(n,Ut,C,F,L,V,A);
+showFlux(n,Ut,F,L,V,flux_grad,A);
+showType(C);
+showBottomSettlingFlux(n,Ut,C,F,flux_grad,A,Ups);
+showTopSettlingFlux();
+
+function showValues(n,Ut,C,F,L,V,A)
+text('FontSize',15,'Position',[0 0],'Interpreter','latex','String','$$\underline{Parameters\hspace{2mm}given\hspace{5mm}}$$');
+%n
+strn=strcat('$$Exponent\hspace{2mm}n=',sprintf('%.3f',n),'$$');
+text('FontSize',15,'Position',[0 -1*1.2],'Interpreter','latex','String',strn);
+%Ut
+strUt=strcat('$$Particle\hspace{2mm}Terminal\hspace{2mm}Velocity\hspace{2mm}U_T=',sprintf('%.5f',Ut),'m/s$$');
+text('FontSize',15,'Position',[0 -2*1.2],'Interpreter','latex','String',strUt);
+%F
+strF=strcat('$$Feed\hspace{2mm}Flow\hspace{2mm}Rate\hspace{2mm}F=',sprintf('%.6f',F),'m^3/s$$');
+text('FontSize',15,'Position',[0 -3*1.2],'Interpreter','latex','String',strF);
+%L
+strL=strcat('$$Underflow\hspace{2mm}Rate\hspace{2mm}L=',sprintf('%.6f',L),'m^3/s$$');
+text('FontSize',15,'Position',[0 -4*1.2],'Interpreter','latex','String',strL);
+%V
+strV=strcat('$$Overflow\hspace{2mm}Rate\hspace{2mm}V=',sprintf('%.6f',V),'m^3/s$$');
+text('FontSize',15,'Position',[0 -5*1.2],'Interpreter','latex','String',strV);
+%CF
+strCF=strcat('$$Feed\hspace{2mm}Concentration\hspace{2mm}C_F=',sprintf('%.4f',C(2)),'$$');
+text('FontSize',15,'Position',[0 -6*1.2],'Interpreter','latex','String',strCF);
+%CF
+strA=strcat('$$Cross-sectional\hspace{2mm}Area\hspace{2mm}of\hspace{2mm}Thickener\hspace{2mm}A=',sprintf('%.6f',A),'m^2$$');
+text('FontSize',15,'Position',[0 -7*1.2],'Interpreter','latex','String',strA);
+
+function showFlux(n,Ut,F,L,V,flux_grad,A)
+text('FontSize',15,'Position',[0 -8.5*1.2],'Interpreter','latex','String',...
+    '$$\underline{Determining\hspace{2mm}flux\hspace{2mm}equations\hspace{9mm}}$$');
+%Batch Settling Flux
+strBatch=strcat('$$Batch\hspace{2mm}settling\hspace{2mm}flux=U_TC(1-C)^n=',sprintf('%.6fC(1-C)^{%.3f}$$',Ut,n));
+text('FontSize',15,'Position',[0 -9.5*1.2],'Interpreter','latex','String',strBatch);
+%Feed Flux
+strFeed=strcat('$$Feed\hspace{2mm}flux=\frac{F}{A}C=\frac',sprintf('{%.6f}{%.6f}C={%.6f}C$$',F,A,flux_grad(1)));
+text('FontSize',15,'Position',[0 -10.5*1.2],'Interpreter','latex','String',strFeed);
+%Underflow Flux
+strUnder=strcat('$$Underflow\hspace{2mm}flux=\frac{L}{A}C=\frac',sprintf('{%.6f}{%.6f}C={%.6f}C$$',L,A,flux_grad(2)));
+text('FontSize',15,'Position',[0 -11.5*1.2],'Interpreter','latex','String',strUnder);
+%Overflow Flux
+strOver=strcat('$$Overflow\hspace{2mm}flux=-\frac{V}{A}C=-\frac',sprintf('{%.6f}{%.6f}C={%.6f}C$$',V,A,flux_grad(3)));
+text('FontSize',15,'Position',[0 -12.5*1.2],'Interpreter','latex','String',strOver);
+%D0wmward flux below feed
+strBottom1='$$Downward\hspace{2mm}flux\hspace{2mm}below\hspace{2mm}feed=\hspace{2mm}Batch\hspace{2mm}Flux\hspace{1mm}+\hspace{1mm}Underflow\hspace{2mm}Flux'
+text('FontSize',15,'Position',[0 -13.5*1.2],'Interpreter','latex','String',strBottom1);
+strBottom2=strcat('$$=U_TC(1-C)^n+\frac{L}{A}C=',sprintf('%.6fC(1-C)^{%.3f}+{%.6f}C',Ut,n,flux_grad(2)));
+text('FontSize',15,'Position',[0 -14.5*1.2],'Interpreter','latex','String',strBottom2);
+%Dpwmward flux above feed
+strTop1='$$Downward\hspace{2mm}flux\hspace{2mm}above\hspace{2mm}feed=\hspace{2mm}Batch\hspace{2mm}Flux\hspace{1mm}+\hspace{1mm}Overflow\hspace{2mm}Flux'
+text('FontSize',15,'Position',[0 -15.5*1.2],'Interpreter','latex','String',strTop1);
+strTop2=strcat('$$=U_TC(1-C)^n-\frac{V}{A}C=',sprintf('%.6fC(1-C)^{%.3f}-{%.6f}C',Ut,n,abs(flux_grad(3))));
+text('FontSize',15,'Position',[0 -16.5*1.2],'Interpreter','latex','String',strTop2);
+
+function showType(C)
+text('FontSize',15,'Position',[0 -17*1.2],'Interpreter','latex','String',...
+    '$$\underline{Determining\hspace{2mm}thickener\hspace{2mm}conditions\hspace{9mm}}$$');
+%CFcritical
+strCrit1=strcat('$$Since\hspace{2mm}there\hspace{2mm}are\hspace{2mm}no\hspace{2mm}minimum\hspace{2mm}point',...
+    '\hspace{2mm}on\hspace{2mm}graph\hspace{2mm}for\hspace{2mm}C\hspace{2mm}greater\hspace{2mm}than\hspace{2mm}C_F');
+text('FontSize',15,'Position',[0 -18*1.2],'Interpreter','latex','String',strCrit1);
+strCrit2=strcat('$$C_{F_{crit}}=Intersection\hspace{2mm}between\hspace{2mm}feed\hspace{2mm}flux\hspace{2mm}and\hspace{2mm}downward\hspace{2mm}flux\hspace{2mm}above\hspace{2mm}feed',...
+    sprintf('=%.4f$$',C(5)));
+text('FontSize',15,'Position',[0 -19*1.2],'Interpreter','latex','String',strCrit2);
+strCrit3=sprintf('$$C_F=%.4f\\hspace{2mm}<C_{F_{crit}=%.4f}\\hspace{3mm}\\rightarrow \\hspace{3mm} \\bf{Thickener\\hspace{2mm}is\\hspace{2mm}Underloaded}$$',C(2),C(5));
+text('FontSize',15,'Position',[0 -19*1.2],'Interpreter','latex','String',strCrit3);
+
+
+function showBottomSettlingFlux(n,Ut,C,F,flux_grad,A,Ups)
+text('FontSize',15,'Position',[0 -20.5*1.2],'Interpreter','latex','String',...
+    '$$\underline{Determining\hspace{2mm}Bottom\hspace{2mm}Feed\hspace{2mm}Concentration\hspace{9mm}}$$');
+%UpsF
+strUpsF=strcat('$$Feed\hspace{2mm}flux\hspace{2mm}at\hspace{2mm}feed\hspace{2mm}concentration\hspace{2mm}C_F\hspace{2mm}U_{ps}=',...
+    '\frac{FC_F}{A}=\frac',sprintf('{(%.6f)(%.4f)}{%.6f}=%.6f',F,C(2),A,Ups(1)));
+text('FontSize',15,'Position',[0 -21.5*1.2],'Interpreter','latex','String',strUpsF);
+%
+str='$$For\hspace{2mm}underloaded\hspace{2mm}system,\hspace{2mm}the\hspace{2mm}bottom\hspace{2mm}section\hspace{2mm}carries\hspace{2mm}all\hspace{2mm}the\hspace{2mm}flux';
+text('FontSize',15,'Position',[0 -22.5*1.2],'Interpreter','latex','String',str);
+%CL
+strCL='$$Therefore,\hspace{2mm}Feed\hspace{2mm}Flux\hspace{2mm}=\hspace{2mm}Underflow\hspace{2mm}Flux.$$';
+text('FontSize',15,'Position',[0 -23.5*1.2],'Interpreter','latex','String',strCL);
+strCL2=strcat('$$U_{ps}=',sprintf('%.6f=',Ups(1)),'\frac{LC_L}{A}=\frac',sprintf('%.6fC_L$$',flux_grad(2)));
+text('FontSize',15,'Position',[0 -24.5*1.2],'Interpreter','latex','String',strCL2);
+strCL3=strcat('\rightarrow\hspace{3mm}\bf{C_L=',sprintf('%.4f}$$',C(3)));
+text('FontSize',15,'Position',[0 -25.5*1.2],'Interpreter','latex','String',strCL3);
+%CB
+strCB='$$Similarly,\hspace{2mm}Feed\hspace{2mm}Flux\hspace{2mm}=\hspace{2mm}Downward\hspace{2mm}Flux$$';
+text('FontSize',15,'Position',[0 -23.5*1.2],'Interpreter','latex','String',strCB);
+strCB2=strcat('$$U_{ps}=',sprintf('%.6f=',Ups(1)),'$$=U_TC_B(1-C_B)^n+\frac{L}{A}C_B=',sprintf('%.6fC_B(1-C_B)^{%.3f}+{%.6f}C_B',Ut,n,flux_grad(2)));
+text('FontSize',15,'Position',[0 -23.5*1.2],'Interpreter','latex','String',strCB2);
+strCB3=strcat('\rightarrow\hspace{3mm}\bf{C_B=',sprintf('%.4f}$$',C(1)));
+text('FontSize',15,'Position',[0 -24.5*1.2],'Interpreter','latex','String',strCB3);
+
+function showTopSettlingFlux()
+text('FontSize',15,'Position',[0 -26*1.2],'Interpreter','latex','String',...
+    '$$\underline{Determining\hspace{2mm}Top\hspace{2mm}Geed\hspace{2mm}Concentration\hspace{9mm}}$$');
+str='$$Since\hspace{2mm}thickener\hspace{2mm}is\hspace{2mm}underloaded,\hspace{2mm}all\hspace{2mm}particles\hspace{2mm}are\hspace{2mm}carried\hspace{2mm}to\hspace{2mm}the\hspace{2mm}bottom\hspace{2mm}feed$$';
+str2='$$\rightarrow\hspace{3mm}\bf{C_T=C_V=0}$$';
+text('FontSize',15,'Position',[0 -27*1.2],'Interpreter','latex','String',str);
+text('FontSize',15,'Position',[0 -28*1.2],'Interpreter','latex','String',str2);
+
